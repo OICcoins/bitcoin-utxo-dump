@@ -1,16 +1,16 @@
 package main
 
 // local packages
-import "github.com/in3rsha/bitcoin-utxo-dump/bitcoin/btcleveldb" // chainstate leveldb decoding functions
-import "github.com/in3rsha/bitcoin-utxo-dump/bitcoin/keys"   // bitcoin addresses
-import "github.com/in3rsha/bitcoin-utxo-dump/bitcoin/bech32" // segwit bitcoin addresses
+import "github.com/OICcoins/bitcoin-utxo-dump/bitcoin/btcleveldb" // chainstate leveldb decoding functions
+import "github.com/OICcoins/bitcoin-utxo-dump/bitcoin/keys"   // neutron addresses
+import "github.com/OICcoins/bitcoin-utxo-dump/bitcoin/bech32" // segwit neutron addresses
 
 import "github.com/syndtr/goleveldb/leveldb" // go get github.com/syndtr/goleveldb/leveldb
 import "github.com/syndtr/goleveldb/leveldb/opt" // set no compression when opening leveldb
 import "flag"         // command line arguments
 import "fmt"
 import "os"           // open file for writing
-import "os/exec"      // execute shell command (check bitcoin isn't running)
+import "os/exec"      // execute shell command (check neutron isn't running)
 import "os/signal"    // catch interrupt signals CTRL-C to close db connection safely
 import "syscall"      // catch kill commands too
 import "bufio"        // bulk writing to file
@@ -23,15 +23,15 @@ func main() {
     // Version
     const Version = "1.0.1"
 
-    // Check bitcoin isn't running first
-    cmd := exec.Command("bitcoin-cli", "getnetworkinfo")
+    // Check neutron isn't running first
+    cmd := exec.Command("neutrond", "getinfo")
     _, err := cmd.Output()
     if err == nil {
-        fmt.Println("Bitcoin is running, shutdown with `bitcoin-cli stop` first. We don't want to access the chainstate LevelDB while Bitcoin is running.")
-        fmt.Println("Also make sure that bitcoind will not auto-restart after you shut it down (e.g. it's running as a systemd service.)")
+        fmt.Println("Neutron is running, shutdown with `neutrond stop` first. We don't want to access the chainstate LevelDB while Neutron is running.")
+        fmt.Println("Also make sure that neutrond will not auto-restart after you shut it down (e.g. it's running as a systemd service.)")
         return
     }
-    
+
     // Check if OS type is Mac OS, then increase ulimit -n to 4096 filehandler during runtime and reset to 1024 at the end
     // Mac OS standard is 1024
     // Linux standard is already 4096 which is also "max" for more edit etc/security/limits.conf
@@ -43,14 +43,14 @@ func main() {
             fmt.Println("setting new ulimit failed with %s\n", err)
         }
         defer exec.Command("ulimit", "-n", "1024")
-	}    
+	}
 
     // Set default chainstate LevelDB and output file
-    defaultfolder := fmt.Sprintf("%s/.bitcoin/chainstate/", os.Getenv("HOME")) // %s = string
+    defaultfolder := fmt.Sprintf("%s/.neutron/", os.Getenv("HOME")) // %s = string
     defaultfile := "utxodump.csv"
 
     // Command Line Options (Flags)
-    chainstate := flag.String("db", defaultfolder, "Location of bitcoin chainstate db.") // chainstate folder
+    chainstate := flag.String("db", defaultfolder, "Location of neutron chainstate db.") // chainstate folder
     file := flag.String("o", defaultfile, "Name of file to dump utxo list to.") // output file
     fields := flag.String("f", "count,txid,vout,amount,type,address", "Fields to include in output. [count,txid,vout,height,amount,coinbase,nsize,script,type,address]")
     testnetflag := flag.Bool("testnet", false, "Is the chainstate leveldb for testnet?") // true/false
@@ -81,8 +81,8 @@ func main() {
         return
     }
 
-    // Select bitcoin chainstate leveldb folder
-    // open leveldb without compression to avoid corrupting the database for bitcoin
+    // Select neutron chainstate leveldb folder
+    // open leveldb without compression to avoid corrupting the database for neutron
     opts := &opt.Options{
         Compression: opt.NoCompression,
     }

@@ -1,6 +1,6 @@
 package keys
 
-import "github.com/in3rsha/bitcoin-utxo-dump/bitcoin/crypto"
+import "github.com/OICcoins/bitcoin-utxo-dump/bitcoin/crypto"
 import "github.com/akamensky/base58"
 import "math/big"
 
@@ -67,6 +67,6 @@ func DecompressPublicKey(publickey []byte) []byte { // decompressing public keys
     uncompressed := []byte{0x04}
     uncompressed = append(uncompressed, x...)
     uncompressed = append(uncompressed, y_bytes...)
-    
+
     return uncompressed
 }

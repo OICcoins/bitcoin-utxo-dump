@@ -1,6 +1,6 @@
 # Bitcoin UTXO Dump
 
-**Warning:** This tool may corrupt your chainstate database. If it does, you will need to run `bitcoind -reindex-chainstate` the next time you run bitcoin, and this usually takes around a day to complete. It's not a terrible problem, but it can be annoying. I'm not entirely sure why it happens, so if you can figure out how to fix it, that would be cool.
+**Warning:** This tool may corrupt your chainstate database. If it does, you will need to run `neutrond -reindex` the next time you run bitcoin, and this usually takes around a day to complete. It's not a terrible problem, but it can be annoying. I'm not entirely sure why it happens, so if you can figure out how to fix it, that would be cool.
 
 -----
 
@@ -31,14 +31,14 @@ count,txid,vout,amount,type,address
 First of all, you need to have a full copy of the blockchain. You also need to install LevelDB:
 
 ```
-sudo apt install bitcoind
+sudo apt install neutrond
 sudo apt install libleveldb-dev
 ```
 
 After that, if you have [Go](https://golang.org/) installed you can do:
 
 ```
-go get github.com/in3rsha/bitcoin-utxo-dump
+go get github.com/OICcoins/bitcoin-utxo-dump
 ```
 
 This will create a binary called `bitcoin-utxo-dump`, which you can call from the command line:
@@ -49,9 +49,9 @@ $ bitcoin-utxo-dump
 
 This will start dumping all of the UTXO database to a file called `utxodump.csv`.
 
-**NOTE:** This program reads the chainstate LevelDB database created by `bitcoind`, so you will need to download and sync `bitcoind` for this script to work. In other words, this script reads your own local copy of the blockchain.
+**NOTE:** This program reads the chainstate LevelDB database created by `neutrond`, so you will need to download and sync `neutrond` for this script to work. In other words, this script reads your own local copy of the blockchain.
 
-**NOTE:** LevelDB wasn't designed to be accessed by multiple programs at the same time, so make sure `bitcoind` isn't running before you start (`bitcoin-cli stop` should do it).
+**NOTE:** LevelDB wasn't designed to be accessed by multiple programs at the same time, so make sure `neutrond` isn't running before you start (`neutrond stop` should do it).
 
 
 ## Usage
@@ -122,7 +122,7 @@ Either way, I'd probably make a cup of tea after it starts running.
 
 ### How big is the file?
 
-The file should be around **7GB** (roughly **2.5 times the size** of the LevelDB database: `du -h ~/.bitcoin/chainstate/`).
+The file should be around **7GB** (roughly **2.5 times the size** of the LevelDB database: `du -h ~/.neutron/`).
 
 Again, this depends on how many entries are in the UTXO database, but it also depends what _fields_ you choose to have in the results:
 
@@ -134,9 +134,9 @@ $ bitcoin-utxo-dump -f count,txid,vout,height,coinbase,amount,nsize,script,type,
 
 ### What versions of bitcoin does this tool work with?
 
-This tool works for Bitcoin Core [0.15.1](https://bitcoincore.org/en/releases/0.15.1/) and above. You can check your version with `bitcoind --version`.
+This tool works for Bitcoin Core [0.15.1](https://bitcoincore.org/en/releases/0.15.1/) and above. You can check your version with `neutrond --version`.
 
-Older versions of bitcoind have a different chainstate LevelDB structure. The structure was updated in 0.15.1 to make reading from the database more memory-efficient. Here's an interesting talk by [Chris Jeffrey](https://youtu.be/0WCaoGiAOHE?t=8936) that explains how you could crash Bitcoin Core with the old chainstate database structure.
+Older versions of neutrond have a different chainstate LevelDB structure. The structure was updated in 0.15.1 to make reading from the database more memory-efficient. Here's an interesting talk by [Chris Jeffrey](https://youtu.be/0WCaoGiAOHE?t=8936) that explains how you could crash Bitcoin Core with the old chainstate database structure.
 
 Nonetheless, if you really want to parse an _old-style_ chainstate database, try one of the _similar tools_ at the bottom of this page.
 
